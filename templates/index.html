@@ -215,11 +215,35 @@
         #highlighted-questions button:hover {
             background: #45a049;
         }
+
+        #voiceSearchButton {
+            padding: 10px;
+            border: 1px solid #4CAF50;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            margin-left: 5px;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        #voiceSearchButton:hover {
+            background: red;
+        }
+
+        #voiceSearchButton.active {
+            background: red;
+            color: red;
+            border-radius: 50%;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <div id="chatbox">
-        <header>Electronic Customs Management Systems</header>
+        <header>Electronic Customs Management System</header>
         <div class="chatlogs" id="chatlogs">
             <!-- Messages will be dynamically added here -->
         </div>
@@ -231,6 +255,7 @@
         <div class="input">
             <input id="userInput" type="text" placeholder="Type your message here...">
             <button id="sendStopButton" onclick="toggleSendStop()">Send</button>
+            <button id="voiceSearchButton" onmousedown="startVoiceRecognition()" onmouseup="stopVoiceRecognition()">🎤</button>
         </div>
     </div>
     <script>
@@ -239,6 +264,7 @@
 
         let typingInterval;
         let stopTypingFlag = false;
+        let recognition;
 
         function typeMessage(message, callback) {
             let i = 0;
@@ -359,6 +385,48 @@
                 setSendButton();
                 stopTyping();
             }
+        }
+
+        function startVoiceRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Sorry, your browser doesn't support speech recognition.");
+                return;
+            }
+
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = function() {
+                console.log('Voice recognition started.');
+                $("#voiceSearchButton").addClass("active");
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                console.log('Voice Input: ', transcript);
+                $("#userInput").val(transcript);
+                toggleSendStop(); // Ensure the message is sent immediately
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Voice recognition error: ', event.error);
+            };
+
+            recognition.onend = function() {
+                console.log('Voice recognition ended.');
+                $("#voiceSearchButton").removeClass("active");
+            };
+
+            recognition.start();
+        }
+
+        function stopVoiceRecognition() {
+            if (recognition) {
+                recognition.stop();
+            }
+            $("#voiceSearchButton").removeClass("active");
         }
 
         $(document).ready(function() {
