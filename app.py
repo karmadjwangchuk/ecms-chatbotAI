@@ -57,7 +57,7 @@ def get_response(query):
 
 def greet(sentence):
     GREET_INPUTS = ("hello", "hi", "kuzu zangpo la", "kuzu")
-    GREET_RESPONSE = "Kuzu Zangpo la, Welcome to eCMS. How can I assist you?"
+    GREET_RESPONSE = "Kuzu Zangpo La, Welcome to eCMS. How can I assist you?"
     sentence_no_spaces = sentence.replace(" ", "").lower()
     for word in GREET_INPUTS:
         if word.replace(" ", "").lower() in sentence_no_spaces:

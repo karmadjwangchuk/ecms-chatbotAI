@@ -13,7 +13,7 @@
             justify-content: right;
             align-items: end;
             height: 100vh;
-            position: relative;            
+            position: relative;
         }
 
         #chatbox {
@@ -81,7 +81,7 @@
         }
 
         #chatbox .chatlogs .greeting .greeting-image {
-            width: 200px; /* Adjust the size of the greeting image */
+            width: 200px;
             height: 200px;
             object-fit: cover;
             display: inline-block;
@@ -219,7 +219,7 @@
 </head>
 <body>
     <div id="chatbox">
-        <header>Electronic Customs Management Systems</header>
+        <header>Electronic Customs Management System</header>
         <div class="chatlogs" id="chatlogs">
             <!-- Messages will be dynamically added here -->
         </div>
@@ -239,6 +239,7 @@
 
         let typingInterval;
         let stopTypingFlag = false;
+        let recognition;
 
         function typeMessage(message, callback) {
             let i = 0;
@@ -266,7 +267,7 @@
         function stopTyping() {
             stopTypingFlag = true;
             clearInterval(typingInterval);
-            setSendButton(); // Ensure button switches back to "Send"
+            setSendButton();
         }
 
         function showGreeting() {
@@ -289,6 +290,9 @@
             loadingMessage.find(".bot").append('<div class="loader"></div>');
             $("#chatlogs").append(loadingMessage);
             scrollToBottom();
+            setTimeout(() => {
+                loadingMessage.remove();
+            }, 3000);
         }
 
         function scrollToBottom() {
@@ -306,27 +310,27 @@
 
                 showLoadingAnimation();
 
-                $.get("/get", { msg: userInput }, function(data) {
-                    $(".loading").parent().remove();
-                    stopTypingFlag = false;
-                    typeMessage(data.message, function() {
-                        scrollToBottom();
-                        setSendButton(); // Ensure button switches back to "Send"
+                setTimeout(() => {
+                    $.get("/get", { msg: userInput }, function(data) {
+                        stopTypingFlag = false;
+                        typeMessage(data.message, function() {
+                            scrollToBottom();
+                            setSendButton();
+                        });
+                    }).fail(function() {
+                        const errorMessage = "Sorry, there was an error fetching the response.";
+                        typeMessage(errorMessage, function() {
+                            scrollToBottom();
+                            setSendButton();
+                        });
                     });
-                }).fail(function() {
-                    $(".loading").parent().remove();
-                    const errorMessage = "Sorry, there was an error fetching the response.";
-                    typeMessage(errorMessage, function() {
-                        scrollToBottom();
-                        setSendButton(); // Ensure button switches back to "Send"
-                    });
-                });
+                }, 3000); // Simulate loading delay
             }
         }
 
         function sendHighlightedQuestion(question) {
             $("#userInput").val(question);
-            toggleSendStop(); // Ensure the button switches to "Stop"
+            toggleSendStop();
         }
 
         function setSendButton() {
@@ -343,14 +347,11 @@
 
         function toggleSendStop() {
             const userInput = $("#userInput").val();
-
-            // Check if input field is empty
             if (userInput.trim() === "") {
                 setSendButton();
                 stopTyping();
                 return;
             }
-
             const button = $("#sendStopButton");
             if (button.text() === "Send") {
                 setStopButton();
